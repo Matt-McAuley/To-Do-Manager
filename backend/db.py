@@ -42,6 +42,8 @@ class Todo(db.Model):
   priority= db.Column(db.String, nullable=False)
   project_id = db.Column(db.Integer, db.ForeignKey("project.id"), nullable=False)
   user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+  is_completed = db.Column(db.Boolean, default=False, nullable=False)
+  completed_at = db.Column(db.Integer, nullable=True)
 
   def __init__(self, **kwargs):
     """
@@ -54,6 +56,8 @@ class Todo(db.Model):
     self.priority = kwargs.get("priority", "")
     self.project_id = kwargs.get("project_id", 0)
     self.user_id = kwargs.get("user_id", 0)
+    self.is_completed = kwargs.get("is_completed", False)
+    self.completed_at = kwargs.get("completed_at", None)
 
   def serialize(self):
     """
@@ -66,7 +70,9 @@ class Todo(db.Model):
       "due_date": self.due_date,
       "priority": self.priority,
       "project_id": self.project_id,
-      "user_id": self.user_id
+      "user_id": self.user_id,
+      "is_completed": self.is_completed,
+      "completed_at": self.completed_at
     }
   
   def simple_serialize(self):
@@ -79,7 +85,9 @@ class Todo(db.Model):
       "description": self.description,
       "due_date": self.due_date,
       "priority": self.priority,
-      "user_id": self.user_id
+      "user_id": self.user_id,
+      "is_completed": self.is_completed,
+      "completed_at": self.completed_at
     }
 
 

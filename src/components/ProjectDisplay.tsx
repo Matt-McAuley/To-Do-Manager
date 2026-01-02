@@ -105,43 +105,55 @@ const ProjectDisplay = (props : PropTypes) => {
         <Container>
             <TodoSection>
                 <Timeframe>Overdue</Timeframe>
-                {currentProject.todos.filter((todo: Todo) => moment(todo.due_date).isBefore(moment().startOf('day'))).map((todo: Todo, index: number) => (
+                {currentProject.todos.filter((todo: Todo) => !(todo.is_completed === true) && moment(todo.due_date).isBefore(moment().startOf('day'))).map((todo: Todo, index: number) => (
                     <TodoContainer key={index} todo={todo}/>
                 ))}
             </TodoSection>
             <TodoSection>
                 <Timeframe>Today</Timeframe>
-                {currentProject.todos.filter((todo: Todo) => moment(todo.due_date).isBefore(moment().endOf('day')) && moment(todo.due_date).isAfter(moment().endOf('day').subtract(1, 'day'))).map((todo: Todo, index: number) => (
+                {currentProject.todos.filter((todo: Todo) => !(todo.is_completed === true) && moment(todo.due_date).isBefore(moment().endOf('day')) && moment(todo.due_date).isAfter(moment().endOf('day').subtract(1, 'day'))).map((todo: Todo, index: number) => (
                     <TodoContainer key={index} todo={todo}/>
                 ))}
             </TodoSection>
             <TodoSection>
                 <Timeframe>Tomorrow</Timeframe>
-                {currentProject.todos.filter((todo: Todo) => moment(todo.due_date).isBefore(moment().endOf('day').add(1, 'day')) && moment(todo.due_date).isAfter(moment().endOf('day'))).map((todo: Todo, index: number) => (
+                {currentProject.todos.filter((todo: Todo) => !(todo.is_completed === true) && moment(todo.due_date).isBefore(moment().endOf('day').add(1, 'day')) && moment(todo.due_date).isAfter(moment().endOf('day'))).map((todo: Todo, index: number) => (
                     <TodoContainer key={index} todo={todo}/>
                 ))}
             </TodoSection>
             <TodoSection>
                 <Timeframe>This Week</Timeframe>
-                {currentProject.todos.filter((todo: Todo) => moment(todo.due_date).isBefore(moment().endOf('week')) && moment(todo.due_date).isAfter(moment().endOf('day').add(1, 'day'))).map((todo: Todo, index: number) => (
+                {currentProject.todos.filter((todo: Todo) => !(todo.is_completed === true) && moment(todo.due_date).isBefore(moment().endOf('week')) && moment(todo.due_date).isAfter(moment().endOf('day').add(1, 'day'))).map((todo: Todo, index: number) => (
                     <TodoContainer key={index} todo={todo}/>
                 ))}
             </TodoSection>
             <TodoSection>
                 <Timeframe>This Month</Timeframe>
-                {currentProject.todos.filter((todo: Todo) => moment(todo.due_date).isBefore(moment().endOf('month')) && moment(todo.due_date).isAfter(moment().endOf('week'))).map((todo: Todo, index: number) => (
+                {currentProject.todos.filter((todo: Todo) => !(todo.is_completed === true) && moment(todo.due_date).isBefore(moment().endOf('month')) && moment(todo.due_date).isAfter(moment().endOf('week'))).map((todo: Todo, index: number) => (
                     <TodoContainer key={index} todo={todo}/>
                 ))}
             </TodoSection>
             <TodoSection>
                 <Timeframe>This Year</Timeframe>
-                {currentProject.todos.filter((todo: Todo) => moment(todo.due_date).isBefore(moment().endOf('year')) && moment(todo.due_date).isAfter(moment().endOf('month'))).map((todo: Todo, index: number) => (
+                {currentProject.todos.filter((todo: Todo) => !(todo.is_completed === true) && moment(todo.due_date).isBefore(moment().endOf('year')) && moment(todo.due_date).isAfter(moment().endOf('month'))).map((todo: Todo, index: number) => (
                     <TodoContainer key={index} todo={todo}/>
                 ))}
             </TodoSection>
             <TodoSection>
                 <Timeframe>Far Away</Timeframe>
-                {currentProject.todos.filter((todo: Todo) => moment(todo.due_date).isAfter(moment().endOf('year'))).map((todo: Todo, index: number) => (
+                {currentProject.todos.filter((todo: Todo) => !(todo.is_completed === true) && moment(todo.due_date).isAfter(moment().endOf('year'))).map((todo: Todo, index: number) => (
+                    <TodoContainer key={index} todo={todo}/>
+                ))}
+            </TodoSection>
+            <TodoSection>
+                <Timeframe>Completed</Timeframe>
+                {currentProject.todos.filter((todo: Todo) => todo.is_completed === true).sort((a: Todo, b: Todo) => {
+                    // Sort by completed_at descending (most recent first), or by due_date if no completed_at
+                    if (a.completed_at && b.completed_at) {
+                        return b.completed_at - a.completed_at;
+                    }
+                    return b.due_date - a.due_date;
+                }).map((todo: Todo, index: number) => (
                     <TodoContainer key={index} todo={todo}/>
                 ))}
             </TodoSection>

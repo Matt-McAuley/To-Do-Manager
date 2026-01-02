@@ -189,6 +189,24 @@ def delete_todo(todo_id):
   db.session.commit()
   return success_response(todo.serialize())
 
+@app.route('/api/todo/<int:todo_id>/toggle-complete/', methods=["POST"])
+@jwt_required()
+def toggle_todo_complete(todo_id):
+  """
+  Route for toggling todo completion status
+  """
+  current_user = get_jwt_identity()
+  todo = Todo.query.filter_by(id=todo_id, user_id=current_user).first()
+  if todo is None:
+    return failure_response("Couldn't find todo!")
+  todo.is_completed = not todo.is_completed
+  if todo.is_completed:
+    todo.completed_at = int(time.time() * 1000)
+  else:
+    todo.completed_at = None
+  db.session.commit()
+  return success_response(todo.serialize())
+
 @app.route('/api/user/', methods=["POST"])
 def create_user():
   """
@@ -293,8 +311,24 @@ def reset_database():
 if not os.path.exists(db_filename):
     reset_database()
 
+def delete_old_completed_todos():
+    """
+    Function for deleting todos that were completed more than 1 week ago
+    """
+    with app.app_context():
+        one_week_ago = int(time.time() * 1000) - (7 * 24 * 60 * 60 * 1000)
+        old_completed_todos = Todo.query.filter(
+            Todo.is_completed == True,
+            Todo.completed_at < one_week_ago
+        ).all()
+        for todo in old_completed_todos:
+            db.session.delete(todo)
+        db.session.commit()
+        print(f"Deleted {len(old_completed_todos)} old completed todos")
+
 scheduler = BackgroundScheduler()
 scheduler.add_job(func=reset_database, trigger='cron', hour=0, minute=0)
+scheduler.add_job(func=delete_old_completed_todos, trigger='cron', hour=0, minute=0)
 scheduler.start()
 atexit.register(lambda: scheduler.shutdown())
 

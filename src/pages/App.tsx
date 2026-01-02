@@ -150,6 +150,8 @@ function App() {
               priority,
               projectId: currentProject.id,
               projectTitle: currentProject.title,
+              is_completed: data.is_completed || false,
+              completed_at: data.completed_at || null,
             }].sort((a, b) => a.due_date - b.due_date),
           };
           const updatedProjects = [...projects.filter((proj) => proj.id != currentProject.id), updated_project]
@@ -190,6 +192,8 @@ function App() {
               priority,
               projectId: projectId,
               projectTitle: parentProject.title,
+              is_completed: parentProject.todos.find(t => t.id === id)?.is_completed || false,
+              completed_at: parentProject.todos.find(t => t.id === id)?.completed_at || null,
               }].sort((a, b) => a.due_date - b.due_date),
           }
           const updatedProjects = [...projects.filter((proj) => proj.id != projectId), updated_project]
@@ -230,6 +234,39 @@ function App() {
       }
       else
           setCurrentProject(updated_project);
+  }
+
+  const toggleTodoComplete = (id: number, projectId: number) => {
+      fetch(`${backendURL}/api/todo/${id}/toggle-complete/`, {
+          method: "POST",
+          credentials: "include",
+      })
+      .then(response => response.json())
+      .then(data => {
+          const parentProject = projects.find((proj) => proj.id === projectId)!;
+          const updated_todos = parentProject.todos.map(todo => 
+              todo.id === id 
+                  ? { ...todo, is_completed: data.is_completed, completed_at: data.completed_at }
+                  : todo
+          );
+          const updated_project : Project = {
+              id: parentProject.id,
+              title: parentProject.title,
+              todos: updated_todos,
+          };
+          const updatedProjects = [...projects.filter((proj) => proj.id != projectId), updated_project]
+              .sort((a, b) => a.title.toLowerCase().localeCompare(b.title.toLowerCase()));
+          setProjects(updatedProjects);
+          if (currentProject.id === -1) {
+              setCurrentProject({
+                  id: -1,
+                  title: "View All",
+                  todos: updatedProjects.map(project => project.todos).flat().sort((a, b) => a.due_date - b.due_date),
+              });
+          }
+          else
+              setCurrentProject(updated_project);
+      });
   }
 
   const addNewProject = ((title:string) => {
@@ -330,6 +367,7 @@ function App() {
         addNewTodo,
         editTodo,
         deleteTodo,
+        toggleTodoComplete,
         addNewProject,
         editProject,
         deleteProject,

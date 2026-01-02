@@ -6,6 +6,8 @@ type Todo = {
     priority: string;
     projectId: number;
     projectTitle: string;
+    is_completed?: boolean;
+    completed_at?: number | null;
 }
 
 type Project = {
